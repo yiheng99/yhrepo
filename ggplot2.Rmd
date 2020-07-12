@@ -1,0 +1,29 @@
+---
+title: "ggplot2"
+author: "Yiheng"
+date: "7/12/2020"
+output: pdf_document
+---
+
+```{r setup, message=F, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Load data
+```{r, message=F}
+#National Parks in California
+ca <- read_csv("data/ca.csv") #Acadia National Park
+acadia <- read_csv("data/acadia.csv") #Southeast US National Parks
+se <- read_csv("data/se.csv")
+#2016 Visitation for all Pacific West National Parks
+visit_16 <- read_csv("data/visit_16.csv")
+#All Nationally designated sites in Massachusetts
+mass <- read_csv("data/mass.csv")
+```
+## Plotting with `ggplot2`
+```{r,message=F}
+ggplot(data = ca) +
+  geom_point(aes(x = year, y = visitors))
+  
+
