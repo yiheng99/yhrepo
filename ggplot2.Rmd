@@ -24,6 +24,16 @@ mass <- read_csv("data/mass.csv")
 ## Plotting with `ggplot2`
 ```{r,message=F}
 ggplot(data = ca) +
-  geom_point(aes(x = year, y = visitors))
-  
-
+  geom_point(aes(x = year, y = visitors, color = park_name)) +
+  labs(x = "Year",
+      y = "Visitation",
+      title = "California National Park Visitation") +
+  theme_bw() +
+  theme(legend.title=element_blank())
+```
+### faceting
+```{r,message=F}
+ggplot(data = se) +
+  geom_point(aes(x = year, y = visitors, color = park_name)) +
+  facet_wrap(~ state, scales = "free")
+```

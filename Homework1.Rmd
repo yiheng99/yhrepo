@@ -1,0 +1,229 @@
+---
+title: "Homework1"
+author: "Yiheng"
+date: "7/13/2020"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## *1.a.*
+Make sure current file is in the same folder with folder `data` containing `iowa.csv`. Then use `read.csv` function to load data.
+Notice that the default value for `sep` in `read.csv()` function is `","`, claim it as `";"`(which the given csv file uses).
+```{r load_data}
+iowa.df <- read.csv("data/Iowa.csv", header = TRUE, sep = ";")
+```
+## *b.* 
+Use `nrow()` and `ncol()` function to read the row number and column number:
+```{r row_col}
+nrow(iowa.df)
+ncol(iowa.df)
+```
+$\Rightarrow$ `iowa.df` has 33 rows and 10 columns.
+
+## *c.*  
+Use `colnames()` function to read the names of the columns of `iowa.df`:
+```{r}
+colnames(iowa.df)
+```
+
+## *d.* 
+Access element in `iowa.df` with `[]`:
+```{r}
+iowa.df[5,7]
+```
+
+$\Rightarrow$ The value of row 5, column 7 of `iowa.df` is 79.7.
+
+## *e.* 
+```{r}
+iowa.df[2,]
+```
+
+## *2.a.* 
+```{r}
+vector1 <- c("5", "12", "7", "32")#1
+max(vector1)#2
+sort(vector1)#3
+```
+
+<#1> gives an non-erroneous result, because `c()` function combines values into a *vector* or *list*, which can be in type `character`.
+
+<#2> gives the output `"7"`, since the elements of `vector1` are all of type `character`. The help page of `max()` function says:
+
+>Character versions are sorted lexicographically, and this depends on the collating sequence of the locale in use.  
+
+<#3>`sort()` function sorts a vector into ascending(default) or descending order. For character type elements, they're also sorted lexicographically.
+
+```{r eval=FALSE, message=TRUE}
+sum(vector1)#4
+```
+*Error in sum(vector1) : invalid 'type' (character) of argument*
+
+
+
+<#4> should be erroneous, since the arguments of `sum()` function must be numeric or complex or logical vectors, while in this case, it's a character vector.
+
+## *b.*
+```{r}
+vector2 <- c("5",7,12)#1
+```
+```{r eval=FALSE, message=TRUE}
+vector2[2] + vector2[3] #1
+```
+*Error in vector2[2] + vector2[3] :* 
+  *non-numeric argument to binary operator*
+
+<#1>Error comes from applying binary operator `+` to character type arguments: see the elements of vector2:
+```{r}
+vector2
+```
+The output is a vector with elements all of type `character`, since `c()` function coerce all arguments to a common type, which is determined from the highest type of the components in the hierarchy **`NULL`<raw<logical<integer<double<complex<character<list<expression**. In this case, the highest type is `character`.
+
+```{r}
+dataframe3 <- data.frame(z1="5",z2=7,z3=12)#2
+dataframe3[1,2] + dataframe3[1,3]#2
+```
+<#2> The result comes from 7+12, since `data.frame` allows columns to have different types, 7 and 12 remain numeric.
+
+```{r}
+list4 <- list(z1="6", z2=42, z3="49", z4=126)
+list4[[2]]+list4[[4]]#3
+```
+```{r eval=FALSE, message=TRUE}
+list4[2]+list4[4]#4
+```
+*Error in list4[2] + list4[4] : non-numeric argument to binary operator*
+
+
+<#3> `list4[[2]]` and `list4[[4]]` are numeric types, as `[[]]` drops names and structures.
+
+<#4> `[]` accesses the elements with names and structures, see output of `list4[2]`:
+```{r}
+list4[2]
+```
+It's non-numeric, cannot be applied with binary operator `+`.
+
+## *3.a.*
+```{r}
+seq(1, 10000, 372)
+seq(1, 10000, length = 50)
+```
+
+## *b.*
+`times` as a single integer, the result consists of the whole input repeat this many times;
+
+`each` as a non-negative integer, each element of `x` is repeated `each` times.
+
+See the difference more directly from output:
+```{r}
+rep(1:3, times=3)
+rep(1:3, each=3)
+```
+## *MB.Ch1.2*
+```{r}
+library(DAAG)
+library(tidyverse)
+```
+Use `rbind()` function to extract rows 1,2,4,11,13,18 from `orings`.
+```{r}
+extracted_dataframe <- rbind(orings[1,],orings[2,],orings[11,],orings[13,],orings[18,],deparse.level = 1)
+extracted_dataframe
+```
+```{r}
+ggplot(data = extracted_dataframe) +
+  geom_point(aes(x = Temperature,y = Total)) +
+  geom_line(aes(x = Temperature, y = Total))+
+  labs(y = "Total Incidents",title = "Extracted Total Incidents Against Temperature")+
+ theme_bw()
+```
+```{r}
+ggplot(data = orings) +
+  geom_point(aes(x = Temperature,y = Total)) +
+  geom_line(aes(x = Temperature, y = Total))+
+  labs(y = "Total Incidents",title = "Total Incidents Against Temperature")+
+ theme_bw()
+```
+
+## *MB.Ch1.4.*
+
+## *a.*
+```{r}
+my_ais <- ais
+```
+```{r}
+str(my_ais)
+```
+Use `is.na()` function to see if there're any missing values:
+```{r}
+sum(is.na(my_ais))
+```
+$\Rightarrow$ None of the columns hold missing values.
+
+
+## *b.*
+```{r}
+my_table<- table(my_ais$sex,my_ais$sport)
+```
+```{r}
+names(which((my_table[1,]/my_table[2,])>2))
+names(which((my_table[2,]/my_table[1,])>2))
+```
+$\Rightarrow$ In Gym and Netball the factor of female:male is more than 2:1;
+In T_sprnt and W_Polo the factor of male:female is more than 2:1.
+
+
+## *MB.Ch1.6*
+
+```{r}
+a.Manitoba.lakes <- matrix(c(217,254,248,254,253,227,178,207,217,24387,5374,
+                             4624,2247,1353,1223,1151,755,657),ncol = 2)
+lakenames <-c("Winnipeg","Winnipegosis","Manitoba","SouthernIndian",
+              "Cedar","Island","Gods","Cross","Playgreen")#giving row names
+rownames(a.Manitoba.lakes)<- lakenames
+colnames(a.Manitoba.lakes) <- c("elevation","area")#giving column names
+Manitoba.lakes <- data.frame(a.Manitoba.lakes)#transfer into dataframe structure.
+Manitoba.lakes
+```
+
+## *a.*
+```{r}
+attach(Manitoba.lakes)
+plot(log2(area) ~ elevation, pch=16, xlim=c(170,280))
+# NB: Doubling the area increases log2(area) by 1.0
+text(log2(area) ~ elevation, labels=row.names(Manitoba.lakes), pos=4)
+text(log2(area) ~ elevation, labels=area, pos=2) 
+title("Manitoba’s Largest Lakes")
+```
+
+## *b.*
+```{r}
+plot(area ~ elevation, pch=16, xlim=c(170,280), ylog=T)
+text(area ~ elevation, labels=row.names(Manitoba.lakes), pos=4, ylog=T)
+text(area ~ elevation, labels=area, pos=2, ylog=T) 
+title("Manitoba’s Largest Lakes")
+```
+
+## *MB.Ch1.7.*
+
+## *a.*
+Linear scale:
+```{r}
+dotchart(Manitoba.lakes$area,
+         labels = lakenames,
+         main = "Manitoba lakes' area linear dotchart")
+```
+
+## *b.*
+Logarithmic scale:
+```{r}
+dotchart(log2(Manitoba.lakes$area),
+         labels = lakenames,
+         main = "Manitoba lakes' area logarithmic dotchart")
+```
+
+## *MB.Ch1.8.*
+```{r}
+sum(Manitoba.lakes$area)
+```
+$\Rightarrow$ A lower bound for the area of Manitoba covered by water is 41771 square kilometers.
