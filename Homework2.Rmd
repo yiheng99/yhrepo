@@ -1,0 +1,251 @@
+---
+title: "Homework2"
+author: "Yiheng"
+date: "7/14/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 1.Loading and Cleaning
+
+a.
+```{r}
+ca_pa <- read.csv("data/calif_penn_2011.csv", header = TRUE)
+```
+b.
+```{r}
+nrow(ca_pa)
+ncol(ca_pa)
+```
+$\Rightarrow$ The dataframe has 11275 rows and 34 columns.
+
+c.
+```{r}
+colSums(apply(ca_pa,c(1,2),is.na))
+```
+The command shows the number of missing values each column has.
+
+d.
+```{r}
+ca_pa <- na.omit(ca_pa)
+```
+
+e.
+```{r}
+11275 - nrow(ca_pa)
+```
+$\Rightarrow$ It eliminated 670 rows.
+
+f. They're compatible, since there might be more than one missing values in one row, and the R script below returns `TRUE`:
+```{r}
+670 > max(colSums(apply(ca_pa,c(1,2),is.na)))
+```
+
+## 2. This Very New House
+
+a.
+```{r}
+ggplot(data = ca_pa) +
+  geom_point(mapping = aes(x = Built_2005_or_later, y = Median_house_value))+
+  geom_smooth(mapping = aes(x = Built_2005_or_later, y = Median_house_value))+
+  labs(x = "percentage of houses built since 2005",
+       y = "median house prices",
+       title = "Median House Prices Against New House Percentage") +
+  theme_bw()
+```
+
+b.
+```{r}
+ggplot(data = ca_pa) +
+  geom_point(mapping = aes(x = Built_2005_or_later, y = Median_house_value))+
+  geom_smooth(mapping = aes(x = Built_2005_or_later, y = Median_house_value))+
+  labs(x = "percentage of houses built since 2005",
+       y = "median house prices",
+       title = "Median House Prices Against New House Percentage") +
+  facet_wrap(~ STATEFP , scales = "free") +
+  theme_bw()
+```
+
+## 3. Nobody Home
+
+a.
+```{r}
+ca_pa <- data.frame(ca_pa, vacancy_rate = ca_pa$Vacant_units/ca_pa$Total_units)
+```
+```{r}
+min(ca_pa$vacancy_rate)
+max(ca_pa$vacancy_rate)
+mean(ca_pa$vacancy_rate)
+median(ca_pa$vacancy_rate)
+```
+$\Rightarrow$ The minimum vacancy rate is 0;The maximum vacancy rate is 0.965311;  
+The mean vacancy rate is 0.08888789;The median vacancy rate is 0.06767283. 
+
+b.
+```{r}
+ggplot(data = ca_pa) +
+  geom_point(mapping = aes(x = Median_house_value, y = vacancy_rate))+
+  geom_smooth(mapping = aes(x = Median_house_value, y = vacancy_rate))+
+  labs(x = "median house prices",
+       y = "vacancy rate",
+       title = "Vacancy Rate Against Median House Prices") +
+  theme_bw()
+```
+
+c.
+```{r}
+ggplot(data = ca_pa) +
+  geom_point(mapping = aes(x = Median_house_value, y = vacancy_rate))+
+  geom_smooth(mapping = aes(x = Median_house_value, y = vacancy_rate))+
+  labs(x = "median house prices",
+       y = "vacancy rate",
+       title = "Vacancy Rate Against Median House Prices") +
+  facet_wrap(~ STATEFP, scale = "fixed") +
+  theme_bw()
+```
+The plot shows that in California, house vacancy rate and number of houses at house prices between 0 and 1000000\$ are rather even, while in Pennsylvania there are a lot more houses at low prices(0~250000\$) , house vacancy rate is also higher in this range.
+
+## 4.
+
+a.
+```{r}
+acca <- c()
+for (tract in 1:nrow(ca_pa)) {
+  if (ca_pa$STATEFP[tract] == 6) {
+    if (ca_pa$COUNTYFP[tract] == 1) {
+      acca <- c(acca, tract)
+    }
+  }
+}
+accamhv <- c()
+for (tract in acca) {
+  accamhv <- c(accamhv, ca_pa[tract,10])
+}
+median(accamhv)
+```
+Variable `acca` in the block of code gives the row indices which the house is in Alameda County (county1 in STATEFP 6), while variable `accamhv` gives the median house values of these houses. Using `median()` function, the whole block gives the median level of house price in Alameda County.
+
+b.
+```{r}
+median(ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP ==1),10])
+```
+c.
+```{r}
+mean(ca_pa[which((ca_pa$STATEFP == 6 & ca_pa$COUNTYFP ==1)|
+              (ca_pa$STATEFP == 6 & ca_pa$COUNTYFP ==85)|
+              (ca_pa$STATEFP == 42 & ca_pa$COUNTYFP ==3)),16])
+```
+$\Rightarrow$ The average percentages of housing built since 2005 is 2.437344.
+
+d.
+```{r}
+#(i)
+cor(ca_pa$Median_house_value,ca_pa$Built_2005_or_later)
+#(ii)
+cor(ca_pa[which(ca_pa$STATEFP==6),10],ca_pa[which(ca_pa$STATEFP==6),16])
+#(iii)
+cor(ca_pa[which(ca_pa$STATEFP==42),10],ca_pa[which(ca_pa$STATEFP==42),16])
+#(iv)
+cor(ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 1),10],
+  ca_pa[which(ca_pa$STATEFP==6 & ca_pa$COUNTYFP == 1),16])
+#(v)
+cor(ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 85),10],
+  ca_pa[which(ca_pa$STATEFP==6 & ca_pa$COUNTYFP == 85),16])
+#(vi)
+cor(ca_pa[which(ca_pa$STATEFP == 42 & ca_pa$COUNTYFP == 3),10],
+  ca_pa[which(ca_pa$STATEFP==42 & ca_pa$COUNTYFP == 3),16])
+```
+
+e.
+```{r}
+#extract related information
+Alameda <- data.frame(Median_house_value = ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 1),10], Median_income = ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 1),33], county = c("Alameda"))
+
+Santa_Clara <- data.frame(Median_house_value = ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 85),10], Median_income = ca_pa[which(ca_pa$STATEFP == 6 & ca_pa$COUNTYFP == 85),33], county = c("Santa_Clara"))
+
+Allegheny <- data.frame(Median_house_value = ca_pa[which(ca_pa$STATEFP == 42 & ca_pa$COUNTYFP == 3),10], Median_income = ca_pa[which(ca_pa$STATEFP == 42 & ca_pa$COUNTYFP == 3),33], county = c("Allegheny"))
+
+three_counties <- rbind(Alameda, Santa_Clara, Allegheny)
+
+#plot
+ggplot(data = three_counties) +
+  geom_point(aes(x = Median_income, y = Median_house_value, color = county)) +
+  geom_smooth(aes(x = Median_income, y = Median_house_value, color = county)) +
+  labs(x = "Median Income",
+       y = "Median House Value",
+       title = "Median House Value Against Median Income",
+       subtitle = "(Chosen counties)") +
+  theme_bw()
+```
+
+## MB.Ch1.11
+Given code block:
+```{r}
+gender <- factor(c(rep("female", 91), rep("male", 92)))
+table(gender)
+gender <- factor(gender, levels=c("male", "female"))
+table(gender)
+gender <- factor(gender, levels=c("Male", "female"))
+# Note the mistake: "Male" should be "male"
+table(gender)
+table(gender, exclude=NULL)
+rm(gender)  # Remove gender
+```
+`table()` function counts the elements by their factor levels, and the factor levels are assumed to be ordered, that's why the first and second output has different orders.
+
+In the third command, `"male"` in the original dataframe `gender` cannot be paired with any of the levels, thus these elements in the output `gender` becomes `NA`:
+```{r}
+gender <- factor(c(rep("female", 91), rep("male", 92)))
+gender <- factor(gender, levels=c("Male", "female"))
+is.na(gender[92])
+```
+In the last command, expression `exclude=NULL` makes `NA` an extra level, and is the last level printed as `<NA>`.
+
+## MB.Ch1.12
+
+```{r}
+prop_over <- function(x,c){
+  num1 <- 0 
+  i <- 1
+  while (i <= length(x)){
+    if (x[i]>c){
+      num1 <- num1+1
+    }
+    i <- i+1
+  }
+    prop <- num1/length(x)
+  return(prop)
+}
+```
+a.
+```{r}
+prop_over(seq(1,100),60)
+```
+b.
+```{r}
+library(Devore7)
+dotplot(ex01.36)
+my_ex01.36<- ex01.36$C1
+prop_over(my_ex01.36,420)
+```
+
+## MB.Ch1.18
+```{r}
+library(MASS)
+```
+Using `unstack` function:
+```{r}
+Value <- unstack(Rabbit, BPchange~Animal)
+Treatment <- unstack(Rabbit, Treatment~Animal)[,1]
+Dose <- unstack(Rabbit, Dose~Animal)[,1]
+
+Rabbit <- data.frame(Treatment, Dose, Value)
+Rabbit
+```
+
+
+
