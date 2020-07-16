@@ -1,0 +1,14 @@
+---
+title: "tidydata"
+author: "Yiheng"
+date: "7/15/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Learn `dplyr` using gapmider dataset
+
