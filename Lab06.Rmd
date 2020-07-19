@@ -1,0 +1,89 @@
+---
+title: "Lab06"
+author: "Yiheng"
+date: "7/17/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# How the Tetracycline Came to Peoria
+
+`ckm_nodes.csv` has information about each individual doctor in the four towns. `ckm_network.dat` records which doctors knew each other.
+
+## Part I
+
+1.
+```{r}
+ckm_nodes <- read_csv('data/ckm_nodes.csv')
+```
+2.
+a.
+```{r}
+table(ckm_nodes$adoption_date)
+sum(is.na(ckm_nodes$adoption_date))
+```
+$\Rightarrow$ 16 doctors never prescribed, 121 are `NA`s.
+
+b.
+```{r}
+anum <- which(!is.na(ckm_nodes$adoption_date))
+length(anum)
+ckm_nodes <- ckm_nodes %>% 
+  filter(!is.na(adoption_date))
+```
+3.
+```{r warning=FALSE}
+ckm_nodes %>% group_by(adoption_date) %>% 
+  summarize(counts = n()) %>% 
+  ggplot() + #pipe operator exists, shouldn't write ggplot(data = ckm_nodes)
+  geom_point(mapping = aes(x = adoption_date, y = counts))
+```
+```{r}
+ckm_nodes %>% group_by(adoption_date) %>% 
+  summarize(counts = n()) %>% 
+  arrange(adoption_date) %>% 
+  mutate(cumcounts = cumsum(counts)) %>% 
+  ggplot() +
+  geom_point(aes(x = adoption_date, y = cumcounts))
+```
+4.a.
+```{r}
+adopted.early.boo <- ckm_nodes$adoption_date <= 2
+sum(adopted.early.boo)
+adopted.early.ind <- which(ckm_nodes$adoption_date <= 2)
+```
+b.
+```{r}
+adopted.late.boo <- ckm_nodes$adoption_date > 14
+sum(adopted.late.boo)
+adopted.late.ind <- which(ckm_nodes$adoption_date >14)
+```
+## Part II
+
+5.
+```{r}
+ckm_network <- read.table('data/ckm_network.dat')
+#read_table() gives warning messages but read.table() doesn't (?)
+dim(ckm_network)
+ckm_network <- ckm_network[anum,anum]
+dim(ckm_network)
+```
+6.
+```{r}
+contact.num <- rowSums(ckm_network)
+contact.num[41]
+```
+7.
+a.
+```{r}
+contact.37 <- ckm_network[37,]==1 & ckm_nodes$adoption_date<=5
+sum(contact.37)
+```
+b.
+```{r}
+sum(contact.37)/sum(ckm_network[37,])
+```

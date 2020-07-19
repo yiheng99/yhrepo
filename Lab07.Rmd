@@ -1,0 +1,86 @@
+---
+title: "Lab07"
+author: "Yiheng"
+date: "7/18/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+wtid_report <-read_csv("data/wtid-report.csv")
+```
+
+# Division and Power in the 1%
+
+## Part I
+
+1.
+```{r}
+wt <- read_csv('data/wtid-report.csv') %>% dplyr::select(Year,`P99 income threshold`:`P99.9 income threshold`) %>% transmute(Year = Year, P99 = `P99 income threshold`, P99.5 = `P99.5 income threshold`, P99.9 = `P99.9 income threshold`) %>% gather(key = 'level', value = 'threshold',-Year)
+wt.P99.1972 <- wt %>% filter(Year == 1972, level == 'P99')
+wt.P99.5.1942 <- wt %>% filter(Year == 1942, level =='P99.5')
+wt.P99.9.1922 <- wt %>% filter(Year == 1922, level == 'P99.9')
+```
+2.
+```{r}
+ggplot(data = wt, aes(x = Year, y = threshold, color = level)) +
+  geom_point()+
+  xlim(1913,2012)
+```
+3.
+```{r}
+exponent.est_ratio <- function(x,y){
+  return(1-log(10)/log(x/y))
+}
+exponent.est_ratio(1e6,1e7)
+```
+## Part II
+
+4.
+```{r}
+wt.P99 <- wt %>% filter(level == 'P99') %>% dplyr::select(threshold)
+wt.P99.9 <- wt %>% filter(level == 'P99.9') %>% dplyr::select(threshold)
+ratios <- exponent.est_ratio(wt.P99,wt.P99.9) %>% 
+  transmute(ratio = threshold) %>%
+  mutate(Year = unique(wt$Year))
+ggplot(data = ratios, aes(x = Year, y = ratio))+
+  geom_line()
+```
+5.
+```{r}
+ratio12 <- ratios %>% filter(Year == 2012) %>% dplyr::select(ratio)
+xmin <- wt %>% filter(Year == 2012, level == 'P99') %>% dplyr::select(threshold)
+160681*1000*(50000000/xmin)^(1-ratio12)
+```
+6.
+```{r}
+f <- function(x,y,a){
+  return((x/y)^(1-a))
+}
+wt.P99.5 <- wt %>% filter(level == 'P99.5') %>% dplyr::select(threshold)
+record <- f(wt.P99.5,wt.P99.9,ratios$ratio) %>% 
+  transmute(f = threshold) %>% 
+  mutate(Year = unique(wt$Year))
+ggplot(data = record)+
+  geom_point(aes(x = Year, y = f), color = "black")+
+  geom_line(aes(x = Year, y = f), color = "blue")+
+  geom_line(aes(x = Year, y = 5), color = "red")+
+  theme_bw()
+```
+7.
+```{r}
+wt1 <- read_csv('data/wtid-report.csv') %>% 
+  dplyr::select(Year, `P90 income threshold`, `P95 income threshold`) %>% 
+  transmute(Year = Year, P90 = `P90 income threshold`, P95 = `P95 income threshold`) %>% 
+  gather(key = 'level', value = 'threshold', -Year)
+wt.P90 <- wt1 %>% filter(level == 'P90') %>% dplyr::select(threshold)
+wt.P95 <- wt1 %>% filter(level == 'P95') %>% dplyr::select(threshold)
+record1 <- f(wt.P90,wt.P95,ratios$ratio) %>% transmute(value = threshold) %>% 
+  mutate(Year = unique(wt1$Year))
+ggplot(data = record1)+
+  geom_point(aes(x = Year, y = value), color = "black")+
+  geom_line(aes(x = Year, y = value), color = "blue")+
+  geom_hline(yintercept = 2)+
+  theme_bw()
+  
